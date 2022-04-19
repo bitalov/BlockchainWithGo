@@ -78,8 +78,61 @@ func replaceChain(newBlocks []Block) {
   }
 }
 
-var BCserver chan []Block 
 //Blockchain server
+
+func handleConn(conn net.Conn) {
+  defer conn.Close()
+
+  io.WriteString(conn , "Enter your Heart Beats Rate")
+
+  scanner := bufio.NewScanner(conn)
+
+  // Inserting the input into the blockchain
+
+   go func() {
+		for scanner.Scan() {
+			bpm, err := strconv.Atoi(scanner.Text())
+			if err != nil {
+				log.Printf("%v not a number: %v", scanner.Text(), err)
+				continue
+			}
+			newBlock, err := CreateBlock(Blockchain[len(Blockchain)-1], bpm)
+			if err != nil {
+				log.Println(err)
+				continue
+			}
+			if isBlockValid(newBlock, Blockchain[len(Blockchain)-1]) {
+				newBlockchain := append(Blockchain, newBlock)
+				replaceChain(newBlockchain)
+			}
+
+			BCserver <- Blockchain
+			io.WriteString(conn, "\nEnter a new BPM:")
+		}
+	}()
+
+  // Broadcasting
+
+    go func() {
+        for {
+             time.Sleep(30 * time.Second) // Broadcasting every 30 Seconds
+          output, err := json.Marshal(Blockchain)
+          if err != nil {
+             log.Fatal(err)
+          }
+          io.WriteString(conn, string(output))
+        }
+    }()
+
+    for _ = range BCserver {
+      spew.Dump(Blockchain)
+    }
+   
+
+  
+}
+
+var BCserver chan []Block 
 
 
 func main() {
@@ -92,7 +145,31 @@ func main() {
   BCserver = make(chan []Block)
 
   t := time.Now()
-  gensisBlock := Block{0, t.String(), 0, "" , ""}
+  gensisBlock := Block{0, t.String(), 0 , "" , ""}
   spew.Dump(gensisBlock)
+
+  server, err := net.Listen("tcp", ":"+os.Getenv("ADDR"))
+  // Firing up our TCP Server at PORT specified in .env which is "9000" in this case
+
+  if err != nil {
+      log.Fatal(err)
+  }
+
+  defer server.Close()
+  // Closing Connection once we finish
+
+  for {
+     conn ,err := server.Accept()
+    if err != nil {
+      log.Fatal(err)
+    }
+
+    go handleConn(conn)
+    //exploiting go routines to concurrently solving each connection with it's own handler
+  }
+  // Infinite loop that serve every connection it recieved
+
+
+  
   
 }
