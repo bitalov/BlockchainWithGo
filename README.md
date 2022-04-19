@@ -1,4 +1,4 @@
-# This a simple and basic blockchain using GO Lang !
+# Basic Blockchain using Golang !
 
 ### TODO
 - **Networking** : So far this is a blockchain running only in a single node , I'll try to add networking part where different nodes can contribute new blocks.
