@@ -17,5 +17,7 @@
 ### Screenshots
 
 *Screen of POST request using curl*
+![Screen1](https://user-images.githubusercontent.com/60072763/163896882-2ff5bb40-bbce-4763-a02d-c9bd5f7b9c1a.PNG)
 
 *Screen of Blocks*
+![Screen2](https://user-images.githubusercontent.com/60072763/163896916-c2483bc3-5cfc-4fc1-bfaf-faf8bc34a4e8.PNG)
