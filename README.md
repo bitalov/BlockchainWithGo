@@ -1,10 +1,10 @@
 # Basic Blockchain using Golang !
 
 ### TODO
-- **Networking** : So far this is a blockchain running only in a single node , I'll try to add networking part where different nodes can contribute new blocks using TCP. 
-- **Proof of Work** : I'll try to implement PoW Algorithm.
-- **Proof of Stake** : I'll try to implement PoS Algorithm.
-- **Peer-to-Peer** : I'll try to make the blockchain P2P.
+- [ ] **Networking** : So far this is a blockchain running only in a single node , I'll try to add networking part where different nodes can contribute new blocks using TCP. 
+- [ ] **Proof of Work** : I'll try to implement PoW Algorithm.
+- [ ] **Proof of Stake** : I'll try to implement PoS Algorithm.
+- [ ] **Peer-to-Peer** : I'll try to make the blockchain P2P.
 
 ### Steps to Deploy What I've implemented so far
 - Download *main.go* , and *ports.env*.
