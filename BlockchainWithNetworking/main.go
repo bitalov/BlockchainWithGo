@@ -1,6 +1,7 @@
 package main
 
 import (
+  "fmt"
   "bufio"
   "crypto/sha256"
 	"encoding/hex"
@@ -126,6 +127,7 @@ func handleConn(conn net.Conn) {
 
     for _ = range BCserver {
       spew.Dump(Blockchain)
+      //fmt.Println("Clear")
     }
    
 
@@ -146,6 +148,7 @@ func main() {
 
   t := time.Now()
   gensisBlock := Block{0, t.String(), 0 , "" , ""}
+  Blockchain = append(Blockchain, gensisBlock)
   spew.Dump(gensisBlock)
 
   server, err := net.Listen("tcp", ":"+os.Getenv("ADDR"))
