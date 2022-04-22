@@ -7,7 +7,7 @@ Different blockchains can communicate with each other
 ![illustration+Blockchain](https://user-images.githubusercontent.com/60072763/164713618-2c15c65a-4e4d-44e5-9c22-98878c1abd71.png)
 
 
-### Steps to Deploy What I've implemented so far
+### Deployement
 - Download *main.go* , and *tcp_ports.env*.
 - Rename ports.env to .env using "mv tcp_ports.env .env".
 - run main.go using `run go main.go`
