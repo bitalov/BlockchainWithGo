@@ -1,19 +1,17 @@
 package main
 
 import (
-  "fmt"
-  "bufio"
   "crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
 	"io"
 	"log"
-	"net"
+	"net/http"
 	"os"
 	"time"
-  "strconv"
 
 	"github.com/davecgh/go-spew/spew"
+	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 )
 
@@ -79,63 +77,80 @@ func replaceChain(newBlocks []Block) {
   }
 }
 
-//Blockchain server
-
-func handleConn(conn net.Conn) {
-  defer conn.Close()
-
-  io.WriteString(conn , "Enter your Heart Beats Rate")
-
-  scanner := bufio.NewScanner(conn)
-
-  // Inserting the input into the blockchain
-
-   go func() {
-		for scanner.Scan() {
-			bpm, err := strconv.Atoi(scanner.Text())
-			if err != nil {
-				log.Printf("%v not a number: %v", scanner.Text(), err)
-				continue
-			}
-			newBlock, err := CreateBlock(Blockchain[len(Blockchain)-1], bpm)
-			if err != nil {
-				log.Println(err)
-				continue
-			}
-			if isBlockValid(newBlock, Blockchain[len(Blockchain)-1]) {
-				newBlockchain := append(Blockchain, newBlock)
-				replaceChain(newBlockchain)
-			}
-
-			BCserver <- Blockchain
-			io.WriteString(conn, "\nEnter a new BPM:")
-		}
-	}()
-
-  // Broadcasting
-
-    go func() {
-        for {
-             time.Sleep(30 * time.Second) // Broadcasting every 30 Seconds
-          output, err := json.Marshal(Blockchain)
-          if err != nil {
-             log.Fatal(err)
-          }
-          io.WriteString(conn, string(output))
-        }
-    }()
-
-    for _ = range BCserver {
-      spew.Dump(Blockchain)
-      //fmt.Println("Clear")
-    }
-   
-
-  
+func makeMuxRouter() http.Handler {
+	muxRouter := mux.NewRouter()
+	muxRouter.HandleFunc("/", handleGetBlockchain).Methods("GET")
+	muxRouter.HandleFunc("/", handleWriteBlock).Methods("POST")
+	return muxRouter
 }
 
-var BCserver chan []Block 
+func handleGetBlockchain(w http.ResponseWriter, r *http.Request) {
+	bytes, err := json.MarshalIndent(Blockchain, "", "  ")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	io.WriteString(w, string(bytes))
+}
 
+type Message struct {
+	BPM int
+}
+
+func handleWriteBlock(w http.ResponseWriter, r *http.Request) {
+	var m Message
+
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(&m); err != nil {
+		respondWithJSON(w, r, http.StatusBadRequest, r.Body)
+		return
+	}
+	defer r.Body.Close()
+
+	newBlock, err := CreateBlock(Blockchain[len(Blockchain)-1], m.BPM)
+	if err != nil {
+		respondWithJSON(w, r, http.StatusInternalServerError, m)
+		return
+	}
+	if isBlockValid(newBlock, Blockchain[len(Blockchain)-1]) {
+		newBlockchain := append(Blockchain, newBlock)
+		replaceChain(newBlockchain)
+		spew.Dump(Blockchain)
+	}
+
+	respondWithJSON(w, r, http.StatusCreated, newBlock)
+
+}
+
+func respondWithJSON(w http.ResponseWriter, r *http.Request, code int, payload interface{}) {
+	response, err := json.MarshalIndent(payload, "", "  ")
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("HTTP 500: Internal Server Error"))
+		return
+	}
+	w.WriteHeader(code)
+	w.Write(response)
+}
+
+func run() error {
+	mux := makeMuxRouter()
+	httpAddr := os.Getenv("PORT")
+	log.Println("Listening on ", httpAddr)
+	s := &http.Server{
+		Addr:           ":" + httpAddr,
+		Handler:        mux,
+		ReadTimeout:    10 * time.Second,
+		WriteTimeout:   10 * time.Second,
+		MaxHeaderBytes: 1 << 20,
+	}
+
+	if err := s.ListenAndServe(); err != nil {
+		return err
+	}
+
+	return nil
+}
 
 func main() {
   err := godotenv.Load()
@@ -143,36 +158,11 @@ func main() {
 		log.Fatal(err)
 	}
 
-
-  BCserver = make(chan []Block)
-
-  t := time.Now()
-  gensisBlock := Block{0, t.String(), 0 , "" , ""}
-  Blockchain = append(Blockchain, gensisBlock)
-  spew.Dump(gensisBlock)
-
-  server, err := net.Listen("tcp", ":"+os.Getenv("ADDR"))
-  // Firing up our TCP Server at PORT specified in .env which is "9000" in this case
-
-  if err != nil {
-      log.Fatal(err)
-  }
-
-  defer server.Close()
-  // Closing Connection once we finish
-
-  for {
-     conn ,err := server.Accept()
-    if err != nil {
-      log.Fatal(err)
-    }
-
-    go handleConn(conn)
-    //exploiting go routines to concurrently solving each connection with it's own handler
-  }
-  // Infinite loop that serve every connection it recieved
-
-
-  
-  
+	go func() {
+		t := time.Now()
+		genesisBlock := Block{0, t.String(), 0, "", ""}
+		spew.Dump(genesisBlock)
+		Blockchain = append(Blockchain, genesisBlock)
+	}()
+	log.Fatal(run())
 }
