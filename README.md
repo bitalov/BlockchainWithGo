@@ -1,7 +1,7 @@
 # Basic Blockchain with Golang
 
 ### TODOs :
-- [x] **Networking**.
+- [x] [**Networking**](https://github.com/bitalov/BlockchainWithGo/tree/main/BlockchainWithNetworking).
 - [ ] **Proof of Work**.
 - [ ] **Proof of Stake**.
 - [ ] **Peer-to-Peer**.
