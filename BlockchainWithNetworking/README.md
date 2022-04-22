@@ -1,11 +1,10 @@
 ## Basic TCP Broadcasting Blockchain !
 
-Different blockchains can communicate with each other
+Different blockchains can communicate now with each other
 
 ### TCP Broadcasting Illustration
 
-![illustration+Blockchain](https://user-images.githubusercontent.com/60072763/164713618-2c15c65a-4e4d-44e5-9c22-98878c1abd71.png)
-
+![illustration](https://user-images.githubusercontent.com/60072763/164738471-e2d42b9c-ed18-4d40-afdb-0252b2a9d39e.png)
 
 ### Deployement
 - Download *main.go* , and *tcp_ports.env*.
