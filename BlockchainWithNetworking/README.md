@@ -1,4 +1,4 @@
-## Basic TCP Broadcasting Blockchain !
+# Basic TCP Broadcasting Blockchain
 
 Different blockchains can communicate now with each other
 
