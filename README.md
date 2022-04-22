@@ -9,6 +9,7 @@
 ### Deployement :
 - Download *main.go* , and *ports.env*.
 - Rename ports.env to .env using "mv ports.env .env".
+- run main.go using `run go main.go`
 - Open a web browser and `http://localhost:8080/` (8080 is the port I wrote in .env file).
 - To Add a new Block you can use curl to send a `POST` request to `http://localhost:8080` .
 
