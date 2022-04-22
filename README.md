@@ -1,10 +1,10 @@
 # Basic Blockchain using Golang !
 
 ### TODOs
-- [x] **Networking**
-- [ ] **Proof of Work**
-- [ ] **Proof of Stake**
-- [ ] **Peer-to-Peer**
+- [x] **Networking**.
+- [ ] **Proof of Work**.
+- [ ] **Proof of Stake**.
+- [ ] **Peer-to-Peer**.
 
 ### Deployement
 - Download *main.go* , and *ports.env*.
